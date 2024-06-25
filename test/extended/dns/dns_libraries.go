@@ -57,7 +57,7 @@ var _ = Describe("[sig-network-edge] DNS lookup", func() {
 	f := e2e.NewDefaultFramework("dns-libraries")
 	oc := exutil.NewCLI("dns-libraries")
 	buildFixture := exutil.FixturePath("testdata", "dns", "dns_libraries_go.yaml")
-	dnsFixture := exutil.FixturePath("testdata", "dns")
+	dnsFixture := exutil.FixturePath("testdata", "dns", "go-dns-resolver")
 	labels := exutil.ParseLabelsOrDie("app=dns-libraries-go")
 
 	// creates a simple Pod that is using the image under /testdata/dns, which performs a DNS query to make sure Go's DNS resolver works fine with OpenShift DNS.
