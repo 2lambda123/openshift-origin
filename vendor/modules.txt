@@ -1031,7 +1031,7 @@ github.com/openshift/client-go/user/listers/user/v1
 # github.com/openshift/cluster-network-operator v0.0.0-20240708200319-1cd8678b38fb
 ## explicit; go 1.22.0
 github.com/openshift/cluster-network-operator/pkg/names
-# github.com/openshift/library-go v0.0.0-20240709182732-b94141242b0c
+# github.com/openshift/library-go v0.0.0-20240711100342-737dc0fa5232
 ## explicit; go 1.22.0
 github.com/openshift/library-go/pkg/apiserver/admission/admissionrestconfig
 github.com/openshift/library-go/pkg/apiserver/admission/admissiontimeout
@@ -1083,6 +1083,7 @@ github.com/openshift/library-go/pkg/serviceability
 github.com/openshift/library-go/pkg/template/templateprocessingclient
 github.com/openshift/library-go/test/library
 github.com/openshift/library-go/test/library/apiserver
+github.com/openshift/library-go/test/library/junitapi
 github.com/openshift/library-go/test/library/metrics
 # github.com/pborman/uuid v1.2.0
 ## explicit
