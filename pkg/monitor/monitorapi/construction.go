@@ -347,7 +347,16 @@ func (b *LocatorBuilder) WithAPIUnreachableFromClient(metric model.Metric, servi
 	}
 
 	b.targetType = LocatorTypeAPIUnreachableFromClient
-	b.annotations[LocatorAPIUnreachableHostKey] = getHost(metric, serviceNetworkIP)
+	if host := getHost(metric, serviceNetworkIP); len(host) > 0 {
+		b.annotations[LocatorAPIUnreachableHostKey] = host
+	}
+	if job := string(metric["job"]); len(job) > 0 {
+		b.annotations[LocatorAPIUnreachableComponentKey] = job
+	}
+	if instance := string(metric["instance"]); len(instance) > 0 {
+		b.annotations[LocatorInstanceKey] = instance
+	}
+
 	return b.Build()
 }
 

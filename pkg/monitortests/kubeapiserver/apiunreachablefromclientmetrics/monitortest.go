@@ -65,14 +65,14 @@ func NewMonitorTest() monitortestframework.MonitorTest {
 	return &monitorTest{}
 }
 
-type apiUnreachableMonitor struct {
+type queryAnalyzer struct {
 	query    metrics.QueryRunner
 	analyzer metrics.SeriesAnalyzer
-	callback *apiUnreachableCallback
 }
 
 type monitorTest struct {
-	monitor            *apiUnreachableMonitor
+	queryAnalyzers     []queryAnalyzer
+	callback           *apiUnreachableCallback
 	notSupportedReason error
 }
 
@@ -106,15 +106,27 @@ func (test *monitorTest) StartCollection(ctx context.Context, adminRESTConfig *r
 		return fmt.Errorf("failed to retrieve cluster IP from kubernetes.default.svc - %v", err)
 	}
 
-	test.monitor = &apiUnreachableMonitor{
-		query: &metrics.PrometheusQueryRunner{
-			Client:      client,
-			QueryString: `sum(rate(rest_client_requests_total{code="<error>"}[1m])) by(host)`,
-			Step:        time.Minute,
+	test.callback = &apiUnreachableCallback{
+		serviceNetworkIP: kubeSvc.Spec.ClusterIP,
+	}
+	test.queryAnalyzers = []queryAnalyzer{
+		// rate of client api error by load balancer type
+		{
+			query: &metrics.PrometheusQueryRunner{
+				Client:      client,
+				QueryString: `sum(rate(rest_client_requests_total{code="<error>"}[1m])) by(host)`,
+				Step:        time.Minute,
+			},
+			analyzer: metrics.RateSeriesAnalyzer{},
 		},
-		analyzer: metrics.RateSeriesAnalyzer{},
-		callback: &apiUnreachableCallback{
-			serviceNetworkIP: kubeSvc.Spec.ClusterIP,
+		// api error observed by each kubelet, kcm, and scheduler instance
+		{
+			query: &metrics.PrometheusQueryRunner{
+				Client:      client,
+				QueryString: `sum(rate(rest_client_requests_total{code="<error>", job=~"kubelet|kube-controller-manager|scheduler"}[1m])) by(job, instance)`,
+				Step:        time.Minute,
+			},
+			analyzer: metrics.RateSeriesAnalyzer{},
 		},
 	}
 
@@ -127,15 +139,16 @@ func (test *monitorTest) CollectData(ctx context.Context, storageDir string, beg
 		return nil, nil, test.notSupportedReason
 	}
 
-	m := test.monitor
-	if m == nil {
+	if len(test.queryAnalyzers) == 0 {
 		return monitorapi.Intervals{}, nil, fmt.Errorf("monitor test is not initialized")
 	}
-
-	if err := m.analyzer.Analyze(ctx, m.query, beginning, end, m.callback); err != nil {
-		return monitorapi.Intervals{}, nil, err
+	for _, qa := range test.queryAnalyzers {
+		if err := qa.analyzer.Analyze(ctx, qa.query, beginning, end, test.callback); err != nil {
+			return monitorapi.Intervals{}, nil, err
+		}
 	}
-	return m.callback.intervals, nil, nil
+
+	return test.callback.intervals, nil, nil
 }
 
 func (test *monitorTest) ConstructComputedIntervals(ctx context.Context, startingIntervals monitorapi.Intervals, recordedResources monitorapi.ResourcesMap, beginning, end time.Time) (monitorapi.Intervals, error) {
@@ -177,10 +190,23 @@ func (b *apiUnreachableCallback) NewInterval(metric prometheustypes.Metric, star
 		endTime = end.Timestamp.Time().Add(30 * time.Second)
 	}
 
+	kv := ""
+	for _, label := range []struct {
+		name, key string
+	}{
+		{name: "component", key: "job"},
+		{name: "instance", key: "instance"},
+		{name: "host", key: "host"},
+	} {
+		if value := string(metric[prometheustypes.LabelName(label.key)]); len(value) > 0 {
+			kv = fmt.Sprintf("%s %s=%s", kv, label.name, value)
+		}
+	}
+
 	interval := monitorapi.NewInterval(monitorapi.SourceAPIUnreachableFromClient, monitorapi.Error).
 		Locator(b.locator).
 		Message(monitorapi.NewMessage().
-			HumanMessage(fmt.Sprintf("client observed API error(s), host: %s, duration: %s", string(metric["host"]), endTime.Sub(startTime))).
+			HumanMessage(fmt.Sprintf("client observed API error(s)%s duration=%s", kv, endTime.Sub(startTime))).
 			Reason(monitorapi.APIUnreachableFromClientMetrics)).
 		Display().
 		Build(startTime, endTime)

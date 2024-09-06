@@ -146,7 +146,8 @@ const (
 	LocatorServerKey                LocatorKey = "server"
 	LocatorMetricKey                LocatorKey = "metric"
 
-	LocatorAPIUnreachableHostKey LocatorKey = "host"
+	LocatorAPIUnreachableHostKey      LocatorKey = "host"
+	LocatorAPIUnreachableComponentKey LocatorKey = "component"
 )
 
 type Locator struct {
