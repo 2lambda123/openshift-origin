@@ -13,7 +13,6 @@ import (
 	"github.com/openshift/origin/pkg/test/ginkgo/junitapi"
 	exutil "github.com/openshift/origin/test/extended/util"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -101,13 +100,13 @@ func (test *monitorTest) StartCollection(ctx context.Context, adminRESTConfig *r
 		return err
 	}
 
-	kubeSvc, err := kubeClient.CoreV1().Services(metav1.NamespaceDefault).Get(ctx, "kubernetes", metav1.GetOptions{})
+	resolver, err := NewClusterInfoResolver(ctx, kubeClient)
 	if err != nil {
-		return fmt.Errorf("failed to retrieve cluster IP from kubernetes.default.svc - %v", err)
+		return err
 	}
 
 	test.callback = &apiUnreachableCallback{
-		serviceNetworkIP: kubeSvc.Spec.ClusterIP,
+		resolver: resolver,
 	}
 	test.queryAnalyzers = []queryAnalyzer{
 		// rate of client api error by load balancer type
@@ -130,7 +129,7 @@ func (test *monitorTest) StartCollection(ctx context.Context, adminRESTConfig *r
 		},
 	}
 
-	framework.Logf("monitor[%s]: monitor initialized, service-network-ip: %s", MonitorName, kubeSvc.Spec.ClusterIP)
+	framework.Logf("monitor[%s]: monitor initialized, service-network-ip: %s", MonitorName, resolver.GetKubernetesServiceClusterIP())
 	return nil
 }
 
@@ -169,14 +168,14 @@ func (test *monitorTest) Cleanup(ctx context.Context) error {
 
 // callback passed to the metric analyzer so we can construct the api unreachable intervals
 type apiUnreachableCallback struct {
-	serviceNetworkIP string
-	locator          monitorapi.Locator
-	intervals        monitorapi.Intervals
+	resolver  *clusterInfoResolver
+	locator   monitorapi.Locator
+	intervals monitorapi.Intervals
 }
 
 func (b *apiUnreachableCallback) Name() string { return MonitorName }
 func (b *apiUnreachableCallback) StartSeries(metric prometheustypes.Metric) {
-	b.locator = monitorapi.NewLocator().WithAPIUnreachableFromClient(metric, b.serviceNetworkIP)
+	b.locator = monitorapi.NewLocator().WithAPIUnreachableFromClient(metric, b.resolver)
 }
 func (b *apiUnreachableCallback) EndSeries() { b.locator = monitorapi.Locator{} }
 
