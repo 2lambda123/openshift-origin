@@ -789,6 +789,8 @@ var Annotations = map[string]string{
 
 	"[sig-cli] oc explain should contain proper fields description for image.openshift.io [apigroup:image.openshift.io]": " [Suite:openshift/conformance/parallel]",
 
+	"[sig-cli] oc explain should contain proper fields description for network.operator.openshift.io [apigroup:network.operator.openshift.io]": " [Suite:openshift/conformance/parallel]",
+
 	"[sig-cli] oc explain should contain proper fields description for oauth.openshift.io [apigroup:oauth.openshift.io]": " [Suite:openshift/conformance/parallel]",
 
 	"[sig-cli] oc explain should contain proper fields description for project.openshift.io [apigroup:project.openshift.io]": " [Suite:openshift/conformance/parallel]",

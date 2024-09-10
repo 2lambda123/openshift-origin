@@ -450,6 +450,13 @@ var (
 				pattern: `DESCRIPTION\:.*`,
 			},
 		},
+		"network.operator.openshift.io": {
+			{
+				gv:      schema.GroupVersion{Group: "network.operator.openshift.io", Version: "v1"},
+				field:   "operatorpkis.spec",
+				pattern: `DESCRIPTION\:.*`,
+			},
+		},
 	}
 
 	// This list holds apigroups whose resources are not similar for OpenShift and MicroShift.
@@ -470,11 +477,6 @@ var (
 	}
 
 	specialNetworkingTypes = []explainExceptions{
-		{
-			gv:      schema.GroupVersion{Group: "network.operator.openshift.io", Version: "v1"},
-			field:   "operatorpkis.spec",
-			pattern: `DESCRIPTION\:.*`,
-		},
 		{
 			gv:      schema.GroupVersion{Group: "network.openshift.io", Version: "v1"},
 			field:   "clusternetworks.clusterNetworks",
