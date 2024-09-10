@@ -777,8 +777,6 @@ var Annotations = map[string]string{
 
 	"[sig-cli] oc explain list uncovered GroupVersionResources": " [Suite:openshift/conformance/parallel]",
 
-	"[sig-cli] oc explain networking types when using openshift-sdn should contain proper fields description for special networking types": " [Suite:openshift/conformance/parallel]",
-
 	"[sig-cli] oc explain should contain proper fields description for apps.openshift.io [apigroup:apps.openshift.io]": " [Suite:openshift/conformance/parallel]",
 
 	"[sig-cli] oc explain should contain proper fields description for authorization.openshift.io [apigroup:authorization.openshift.io]": " [Suite:openshift/conformance/parallel]",
@@ -1283,8 +1281,6 @@ var Annotations = map[string]string{
 
 	"[sig-instrumentation] Prometheus [apigroup:image.openshift.io] when installed on the cluster shouldn't report any alerts in firing state apart from Watchdog and AlertmanagerReceiversNotConfigured [Early][apigroup:config.openshift.io]": " [Skipped:Disconnected] [Suite:openshift/conformance/parallel]",
 
-	"[sig-instrumentation] Prometheus [apigroup:image.openshift.io] when installed on the cluster when using openshift-sdn should be able to get the sdn ovs flows": " [Skipped:Disconnected] [Suite:openshift/conformance/parallel]",
-
 	"[sig-instrumentation][Late] Alerts shouldn't exceed the series limit of total series sent via telemetry from each cluster": " [Suite:openshift/conformance/parallel]",
 
 	"[sig-instrumentation][Late] OpenShift alerting rules [apigroup:image.openshift.io] should have a runbook_url annotation if the alert is critical": " [Skipped:Disconnected] [Suite:openshift/conformance/parallel]",
@@ -1381,29 +1377,15 @@ var Annotations = map[string]string{
 
 	"[sig-network] services when running openshift ipv4 cluster on bare metal [apigroup:config.openshift.io] ensures external auto assign cidr is configured correctly on the cluster [apigroup:config.openshift.io] [Serial]": " [Suite:openshift/conformance/serial]",
 
-	"[sig-network][Feature:CNIMigration] All nodes should be in ready state [Early][Suite:openshift/network/live-migration]": "",
-
-	"[sig-network][Feature:CNIMigration] Cluster operators should be stable [Late][Suite:openshift/network/live-migration]": "",
-
-	"[sig-network][Feature:CNIMigration] Cluster should not be live migrating before beginning migration [Early][Suite:openshift/network/live-migration]": "",
-
-	"[sig-network][Feature:CNIMigration] Should perform live migration [Disruptive][Suite:openshift/network/live-migration]": " [Serial]",
-
-	"[sig-network][Feature:CNIMigration] Target CNI should not be deployed [Early][Suite:openshift/network/live-migration]": "",
-
 	"[sig-network][Feature:EgressFirewall] egressFirewall should have no impact outside its namespace": " [Suite:openshift/conformance/parallel]",
 
 	"[sig-network][Feature:EgressFirewall] when using openshift ovn-kubernetes should ensure egressfirewall is created": " [Suite:openshift/conformance/parallel]",
 
-	"[sig-network][Feature:EgressFirewall] when using openshift-sdn should ensure egressnetworkpolicy is created [apigroup:network.openshift.io]": " [Suite:openshift/conformance/parallel]",
-
-	"[sig-network][Feature:EgressIP][apigroup:operator.openshift.io] [external-targets][apigroup:user.openshift.io][apigroup:security.openshift.io] EgressIPs can be assigned automatically [Skipped:Network/OVNKubernetes]": " [Serial] [Suite:openshift/conformance/serial]",
-
-	"[sig-network][Feature:EgressIP][apigroup:operator.openshift.io] [external-targets][apigroup:user.openshift.io][apigroup:security.openshift.io] only pods matched by the pod selector should have the EgressIPs [Skipped:Network/OpenShiftSDN]": " [Serial] [Suite:openshift/conformance/serial]",
+	"[sig-network][Feature:EgressIP][apigroup:operator.openshift.io] [external-targets][apigroup:user.openshift.io][apigroup:security.openshift.io] only pods matched by the pod selector should have the EgressIPs": " [Serial] [Suite:openshift/conformance/serial]",
 
 	"[sig-network][Feature:EgressIP][apigroup:operator.openshift.io] [external-targets][apigroup:user.openshift.io][apigroup:security.openshift.io] pods should have the assigned EgressIPs and EgressIPs can be deleted and recreated [Skipped:azure][apigroup:route.openshift.io]": " [Serial] [Suite:openshift/conformance/serial]",
 
-	"[sig-network][Feature:EgressIP][apigroup:operator.openshift.io] [external-targets][apigroup:user.openshift.io][apigroup:security.openshift.io] pods should have the assigned EgressIPs and EgressIPs can be updated [Skipped:Network/OpenShiftSDN]": " [Serial] [Suite:openshift/conformance/serial]",
+	"[sig-network][Feature:EgressIP][apigroup:operator.openshift.io] [external-targets][apigroup:user.openshift.io][apigroup:security.openshift.io] pods should have the assigned EgressIPs and EgressIPs can be updated": " [Serial] [Suite:openshift/conformance/serial]",
 
 	"[sig-network][Feature:EgressIP][apigroup:operator.openshift.io] [external-targets][apigroup:user.openshift.io][apigroup:security.openshift.io] pods should keep the assigned EgressIPs when being rescheduled to another node": " [Serial] [Suite:openshift/conformance/serial]",
 
