@@ -30,12 +30,6 @@ func isThisContainerRestartExcluded(locator string, exclusion Exclusion) bool {
 			platformsToExclude: "metal",
 		},
 		{
-			// ingress operator seems to only fail on the single topology.
-			// platform did not matter.
-			containerName:     "container/ingress-operator", // https://issues.redhat.com/browse/OCPBUGS-39315
-			topologyToExclude: "single",
-		},
-		{
 			containerName: "container/networking-console-plugin", // https://issues.redhat.com/browse/OCPBUGS-39316
 		},
 	}
