@@ -16,6 +16,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	imagev1 "github.com/openshift/api/image/v1"
+
 	"github.com/openshift/origin/test/extended/util"
 )
 
@@ -26,16 +27,23 @@ type serializedTest struct {
 
 // externalTestsForSuite reads tests from external binary, currently only
 // k8s-tests is supported
-func externalTestsForSuite(ctx context.Context) ([]*testCase, error) {
+func externalTestsForSuite(ctx context.Context, tag string, binaryPath string, provider TestProvider) ([]*testCase, error) {
 	var tests []*testCase
 
-	// TODO: add support for binaries from other images
-	testBinary, err := extractBinaryFromReleaseImage("hyperkube", "/usr/bin/k8s-tests")
+	testBinary, err := extractBinaryFromReleaseImage(tag, binaryPath)
 	if err != nil {
-		return nil, fmt.Errorf("unable to extract k8s-tests binary: %w", err)
+		return nil, fmt.Errorf("unable to extract %v binary from tag %v: %w", binaryPath, tag, err)
 	}
 
-	command := exec.Command(testBinary, "list")
+	cmdOpt := "list"
+	switch provider {
+	case TestProviderGo:
+		cmdOpt = `-test.list ".*"`
+	default:
+		cmdOpt = "list"
+	}
+
+	command := exec.Command(testBinary, cmdOpt)
 	testList, err := runWithTimeout(ctx, command, 1*time.Minute)
 	if err != nil {
 		return nil, fmt.Errorf("failed running '%s list': %w", testBinary, err)
@@ -54,11 +62,21 @@ func externalTestsForSuite(ctx context.Context) ([]*testCase, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		prefix := ""
+		suffix := ""
+		switch provider {
+		case TestProviderGo:
+			prefix = fmt.Sprintf("[External:%s] ", filepath.Base(testBinary))
+			suffix = "[Suite:openshift/conformance/parallel]" // FIXME:hack
+		}
+
 		for _, test := range serializedTests {
 			tests = append(tests, &testCase{
-				name:       test.Name + test.Labels,
-				rawName:    test.Name,
-				binaryName: testBinary,
+				name:         prefix + test.Name + test.Labels + suffix,
+				rawName:      test.Name,
+				binaryName:   testBinary,
+				testProvider: provider,
 			})
 		}
 	}

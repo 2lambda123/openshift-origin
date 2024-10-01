@@ -122,6 +122,11 @@ func max(a, b int) int {
 	return b
 }
 
+type TestProvider string
+
+const TestProviderKube TestProvider = "kube"
+const TestProviderGo TestProvider = "go"
+
 func (o *GinkgoRunSuiteOptions) Run(suite *TestSuite, junitSuiteName string, monitorTestInfo monitortestframework.MonitorTestInitializationInfo, upgrade bool) error {
 	ctx := context.Background()
 
@@ -135,12 +140,43 @@ func (o *GinkgoRunSuiteOptions) Run(suite *TestSuite, junitSuiteName string, mon
 	var fallbackSyntheticTestResult []*junitapi.JUnitTestCase
 	if len(os.Getenv("OPENSHIFT_SKIP_EXTERNAL_TESTS")) == 0 {
 		buf := &bytes.Buffer{}
-		fmt.Fprintf(buf, "Attempting to pull tests from external binary...\n")
-		externalTests, err := externalTestsForSuite(ctx)
+
+		// A registry of available external binaries an in which image
+		// the reside in the payload. We could consider turning this into
+		// an image label in the future.
+		externalBinaries := []struct {
+			imageTag   string
+			binaryPath string
+			provider   TestProvider
+		}{
+			{
+				imageTag:   "hyperkube",
+				binaryPath: "/usr/bin/k8s-tests",
+				provider:   TestProviderKube,
+			},
+			{
+				imageTag:   "tests",
+				binaryPath: "/usr/bin/example.test",
+				provider:   TestProviderGo,
+			},
+		}
+
+		var externalTests []*testCase
+		var err error
+		for _, externalBinary := range externalBinaries {
+			fmt.Fprintf(buf, "Attempting to pull external binary %v from %v...\n", externalBinary.binaryPath, externalBinary.imageTag)
+			tagTestSet, tagErr := externalTestsForSuite(ctx, externalBinary.imageTag, externalBinary.binaryPath, externalBinary.provider)
+			if tagErr != nil {
+				err = fmt.Errorf("failed reading external test suites for %v: %w", externalBinary.imageTag, tagErr)
+				break
+			}
+			externalTests = append(externalTests, tagTestSet...)
+		}
+
 		if err == nil {
-			filteredTests := []*testCase{}
+			var filteredTests []*testCase
 			for _, test := range tests {
-				// tests contains all the tests "registered" in openshif-tests binary,
+				// tests contains all the tests "registered" in openshift-tests binary,
 				// this also includes vendored k8s tests, since this path assumes we're
 				// using external binary to run these tests we need to remove them
 				// from the final lists, which contains:
