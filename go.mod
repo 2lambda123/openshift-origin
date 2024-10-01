@@ -31,7 +31,6 @@ require (
 	github.com/openshift/apiserver-library-go v0.0.0-20240828192036-4d55b6dd978f
 	github.com/openshift/build-machinery-go v0.0.0-20240613134303-8359781da660
 	github.com/openshift/client-go v0.0.0-20240528061634-b054aa794d87
-	github.com/openshift/cluster-network-operator v0.0.0-20240708200319-1cd8678b38fb
 	github.com/openshift/library-go v0.0.0-20240905123346-5bdbfe35a6f5
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
