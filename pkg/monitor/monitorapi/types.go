@@ -99,6 +99,7 @@ const (
 	LocatorTypeContainer       LocatorType = "Container"
 	LocatorTypeNode            LocatorType = "Node"
 	LocatorTypeMachine         LocatorType = "Machine"
+	LocatorTypeAPIService      LocatorType = "APIService"
 	LocatorTypeAlert           LocatorType = "Alert"
 	LocatorTypeMetricsEndpoint LocatorType = "MetricsEndpoint"
 	LocatorTypeClusterOperator LocatorType = "ClusterOperator"
@@ -122,6 +123,7 @@ const (
 	LocatorDeploymentKey      LocatorKey = "deployment"
 	LocatorNodeKey            LocatorKey = "node"
 	LocatorMachineKey         LocatorKey = "machine"
+	LocatorAPIServiceKey      LocatorKey = "apiservice"
 	LocatorEtcdMemberKey      LocatorKey = "etcd-member"
 	LocatorNameKey            LocatorKey = "name"
 	LocatorHmsgKey            LocatorKey = "hmsg"
@@ -211,6 +213,13 @@ const (
 	MachinePhaseChanged IntervalReason = "MachinePhaseChange"
 	MachinePhase        IntervalReason = "MachinePhase"
 
+	APIServiceCreated          IntervalReason = "APIServiceCreated"
+	APIServiceConditionChanged IntervalReason = "APIServiceConditionChanged"
+	APIServiceAvailable        IntervalReason = "APIServiceAvailable"
+	APIServiceUnavailable      IntervalReason = "APIServiceUnavailable"
+	APIServiceUnknown          IntervalReason = "APIServiceUnknown"
+	APIServiceDeletedInAPI     IntervalReason = "APIServiceDeletedInAPI"
+
 	Timeout IntervalReason = "Timeout"
 
 	E2ETestStarted  IntervalReason = "E2ETestStarted"
@@ -268,6 +277,7 @@ const (
 	AnnotationRequestAuditID AnnotationKey = "request-audit-id"
 	AnnotationRoles          AnnotationKey = "roles"
 	AnnotationStatus         AnnotationKey = "status"
+	AnnotationPreviousStatus AnnotationKey = "previousStatus"
 	AnnotationCondition      AnnotationKey = "condition"
 )
 
@@ -281,11 +291,12 @@ const (
 type ConstructionOwner string
 
 const (
-	ConstructionOwnerNodeLifecycle    = "node-lifecycle-constructor"
-	ConstructionOwnerPodLifecycle     = "pod-lifecycle-constructor"
-	ConstructionOwnerEtcdLifecycle    = "etcd-lifecycle-constructor"
-	ConstructionOwnerMachineLifecycle = "machine-lifecycle-constructor"
-	ConstructionOwnerLeaseChecker     = "lease-checker"
+	ConstructionOwnerNodeLifecycle       = "node-lifecycle-constructor"
+	ConstructionOwnerPodLifecycle        = "pod-lifecycle-constructor"
+	ConstructionOwnerEtcdLifecycle       = "etcd-lifecycle-constructor"
+	ConstructionOwnerMachineLifecycle    = "machine-lifecycle-constructor"
+	ConstructionOwnerAPIServiceLifecycle = "apiservice-lifecycle-constructor"
+	ConstructionOwnerLeaseChecker        = "lease-checker"
 )
 
 type Message struct {
@@ -333,6 +344,7 @@ const (
 
 	SourceAPIUnreachableFromClient IntervalSource = "APIUnreachableFromClient"
 	SourceMachine                  IntervalSource = "MachineMonitor"
+	SourceAPIServiceMonitor        IntervalSource = "APIServiceMonitor"
 )
 
 type Interval struct {
