@@ -19,12 +19,14 @@ type auditLogAnalyzer struct {
 
 	summarizer            *summarizer
 	excessiveApplyChecker *excessiveApplies
+	apiserverPaniced      *apiserverPaniced
 }
 
 func NewAuditLogAnalyzer() monitortestframework.MonitorTest {
 	return &auditLogAnalyzer{
 		summarizer:            NewAuditLogSummarizer(),
 		excessiveApplyChecker: CheckForExcessiveApplies(),
+		apiserverPaniced:      CheckForApiserverPaniced(),
 	}
 }
 
@@ -42,6 +44,7 @@ func (w *auditLogAnalyzer) CollectData(ctx context.Context, storageDir string, b
 	auditLogHandlers := []AuditEventHandler{
 		w.summarizer,
 		w.excessiveApplyChecker,
+		w.apiserverPaniced,
 	}
 	err = GetKubeAuditLogSummary(ctx, kubeClient, &beginning, &end, auditLogHandlers)
 
@@ -113,6 +116,37 @@ func (w *auditLogAnalyzer) EvaluateTestsFromConstructedIntervals(ctx context.Con
 			)
 
 		default:
+			ret = append(ret,
+				&junitapi.JUnitTestCase{
+					Name: testName,
+				},
+			)
+		}
+
+	}
+
+	for userAgent, userAgentPanics := range w.apiserverPaniced.panicEventsPerUserAgent.panicEvents {
+		testName := fmt.Sprintf("user %s must not produce too many apiserver handler panics", userAgent)
+
+		failures := []string{}
+		if userAgentPanics.Len() > 5 {
+			failures := append(failures, userAgentPanics.String())
+			ret = append(ret,
+				&junitapi.JUnitTestCase{
+					Name: testName,
+					FailureOutput: &junitapi.FailureOutput{
+						Message: strings.Join(failures, "\n"),
+						Output:  "details in audit log",
+					},
+				},
+			)
+			// Add success again to make it a flake
+			ret = append(ret,
+				&junitapi.JUnitTestCase{
+					Name: testName,
+				},
+			)
+		} else {
 			ret = append(ret,
 				&junitapi.JUnitTestCase{
 					Name: testName,
