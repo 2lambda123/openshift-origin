@@ -62,7 +62,7 @@ func (w *generationWatcher) EvaluateTestsFromConstructedIntervals(ctx context.Co
 
 	ret := []*junitapi.JUnitTestCase{}
 	for _, namespace := range platformNamespaces {
-		testName := fmt.Sprintf("objects in ns/%s should not have a generation greater than %d", namespace, maxGenerationAllowed)
+		testName := fmt.Sprintf("objects in ns/%s should not have too many generations", namespace)
 		nsFailures := namespaceToFailure[namespace]
 		if len(nsFailures) > 0 {
 			ret = append(ret, &junitapi.JUnitTestCase{
